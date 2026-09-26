@@ -1,1 +1,632 @@
-coming soon
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>YouTube (2016 Classic Feed)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+    
+    body {
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background-color: #f1f1f1;
+      color: #333333;
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cccccc;
+      border-radius: 2px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #999999;
+    }
+
+    .yt-card {
+      background: #ffffff;
+      border: 1px solid #e2e2e2;
+      border-bottom-width: 2px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    @media (min-width: 640px) {
+      .yt-card:hover {
+        border-color: #b8b8b8;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+      }
+      .yt-card:hover .yt-title {
+        color: #167ac6;
+      }
+    }
+
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-red-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="fixed top-0 left-0 right-0 h-14 bg-white border-b border-[#e8e8e8] z-50 flex items-center justify-between px-3 sm:px-6 shadow-xs">
+    
+    <!-- Top Left Logo -->
+    <div id="headerLogoContainer" class="flex items-center flex-shrink-0">
+      <a href="https://example.com" class="block focus:outline-none py-1" title="YouTube Home">
+        <img 
+          src="https://placehold.co/120x32/e52d27/ffffff?text=" 
+          alt="Logo" 
+          class="h-7 sm:h-8 w-auto border border-red-700 rounded-xs shadow-xs object-cover"
+          onerror="this.src='data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22120%22%20height%3D%2232%22%3E%3Crect%20width%3D%22120%22%20height%3D%2232%22%20fill%3D%22%23e52d27%22%2F%3E%3Cpolygon%20points%3D%2250%2C8%2050%2C24%2072%2C16%22%20fill%3D%22%23ffffff%22%2F%3E%3C%2Fsvg%3E'"
+        >
+      </a>
+    </div>
+
+    <!-- Search Bar -->
+    <div id="searchBarContainer" class="hidden sm:flex flex-1 max-w-xl mx-2 sm:mx-4 items-center transition-all duration-200">
+      <form id="searchForm" class="flex items-center w-full" onsubmit="return false;">
+        <button type="button" id="mobileSearchBackBtn" class="sm:hidden text-gray-600 p-2 mr-1 hover:text-gray-900">
+          <i class="fa-solid fa-arrow-left text-base"></i>
+        </button>
+        <div class="relative w-full">
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Search" 
+            class="w-full bg-white text-gray-800 text-sm px-3 py-1.5 sm:py-1 border border-[#ccc] rounded-l-sm focus:outline-none focus:border-[#167ac6] shadow-inner transition"
+          >
+          <button type="button" id="clearSearchBtn" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 text-xs p-1">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <button type="button" id="searchSubmitBtn" class="bg-[#f8f8f8] hover:bg-[#f0f0f0] active:bg-[#e8e8e8] border border-l-0 border-[#ccc] text-gray-600 px-4 sm:px-5 py-1.5 sm:py-1 rounded-r-sm transition flex items-center justify-center shadow-xs flex-shrink-0">
+          <i class="fa-solid fa-magnifying-glass text-xs"></i>
+        </button>
+      </form>
+    </div>
+
+    <div id="mobileSearchTriggerContainer" class="flex items-center sm:hidden">
+      <button id="mobileSearchToggleBtn" class="p-2 text-gray-600 hover:text-gray-900 focus:outline-none" aria-label="Open Search">
+        <i class="fa-solid fa-magnifying-glass text-lg"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Feed -->
+  <main class="flex-1 pt-16 sm:pt-18 p-2 sm:p-4 md:p-6 max-w-[1800px] mx-auto w-full">
+    
+    <!-- Controls Bar -->
+    <div class="bg-white border border-[#e2e2e2] rounded-sm p-3 mb-4 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+      <div class="flex items-center gap-2 text-xs text-gray-600 font-medium">
+        <i class="fa-solid fa-arrow-down-short-wide text-gray-500"></i>
+        <span>Sort feed:</span>
+        <select id="sortSelect" class="bg-[#f8f8f8] border border-[#ccc] text-gray-800 text-xs rounded-sm px-2.5 py-1 focus:outline-none focus:border-[#167ac6] cursor-pointer font-medium">
+          <option value="num-asc">Sort: 1 to 200</option>
+          <option value="num-desc">Sort: 200 to 1</option>
+        </select>
+      </div>
+
+      <div class="text-xs text-gray-500 font-medium flex items-center gap-2">
+        <span>Showing <b id="visibleCount" class="text-gray-800">200</b> of 200 videos</span>
+      </div>
+    </div>
+
+    <!-- Search Status -->
+    <div id="searchStatus" class="hidden mb-3 text-xs text-gray-600 bg-white p-2.5 rounded border border-[#e2e2e2] flex justify-between items-center shadow-xs">
+      <span class="truncate pr-2">Filtering for "<b id="searchQueryText"></b>" (<span id="resultCount">0</span> matches)</span>
+      <button id="clearFilterBtn" class="text-[#167ac6] hover:underline font-medium flex-shrink-0">Clear Search</button>
+    </div>
+
+    <!-- Video Grid -->
+    <div id="videoGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4"></div>
+
+    <!-- Empty State -->
+    <div id="noResultsState" class="hidden text-center py-12 sm:py-16 bg-white border border-[#e2e2e2] rounded my-4 px-4">
+      <i class="fa-solid fa-video-slash text-4xl text-gray-300 mb-3"></i>
+      <h3 class="text-base font-bold text-gray-700">No videos found</h3>
+      <p class="text-xs text-gray-500 mt-1">Try typing a different search term or channel name.</p>
+      <button id="resetSearchBtn" class="mt-4 bg-[#f8f8f8] border border-[#d3d3d3] hover:bg-[#f0f0f0] text-gray-800 text-xs px-4 py-2 font-medium rounded-sm">
+        Reset Search
+      </button>
+    </div>
+
+    <!-- Loader -->
+    <div id="feedLoader" class="py-8 text-center flex flex-col items-center justify-center gap-2">
+      <div class="w-7 h-7 border-3 border-gray-300 border-t-[#cc181e] rounded-full animate-spin"></div>
+      <span class="text-xs text-gray-500 font-medium">Loading videos...</span>
+    </div>
+  </main>
+
+  <script>
+    const TOTAL_VIDEOS = 200;
+    const BATCH_SIZE = 25;
+
+    // =======================================================
+    // CUSTOM THUMBNAIL OVERRIDES (1 to 200)
+    // Add or override specific image URLs here:
+    // =======================================================
+    const CUSTOM_THUMBNAILS = {
+      1: "https://joethelavaboy.github.io/Youtube2016/Videos/1/poster.jpg",
+      2: "https://example.com/custom-poster-2.png",
+      3: "https://example.com/custom-poster-2.png",
+      4: "https://example.com/custom-poster-2.png",
+      5: "https://example.com/custom-poster-2.png",
+      6: "https://example.com/custom-poster-2.png",
+      7: "https://example.com/custom-poster-2.png",
+      8: "https://example.com/custom-poster-2.png",
+      9: "https://example.com/custom-poster-2.png",
+      10: "https://example.com/custom-poster-2.png",
+      11: "https://example.com/custom-poster-2.png",
+      12: "https://example.com/custom-poster-2.png",
+      13: "https://example.com/custom-poster-2.png",
+      14: "https://example.com/custom-poster-2.png",
+      15: "https://example.com/custom-poster-2.png",
+      16: "https://example.com/custom-poster-2.png",
+      17: "https://example.com/custom-poster-2.png",
+      18: "https://example.com/custom-poster-2.png",
+      19: "https://example.com/custom-poster-2.png",
+      20: "https://example.com/custom-poster-2.png",
+      21: "https://example.com/custom-poster-2.png",
+      22: "https://example.com/custom-poster-2.png",
+      23: "https://example.com/custom-poster-2.png",
+      24: "https://example.com/custom-poster-2.png",
+      25: "https://example.com/custom-poster-2.png",
+      26: "https://example.com/custom-poster-2.png",
+      27: "https://example.com/custom-poster-2.png",
+      28: "https://example.com/custom-poster-2.png",
+      29: "https://example.com/custom-poster-2.png",
+      30: "https://example.com/custom-poster-2.png",
+      31: "https://example.com/custom-poster-2.png",
+      32: "https://example.com/custom-poster-2.png",
+      33: "https://example.com/custom-poster-2.png",
+      34: "https://example.com/custom-poster-2.png",
+      35: "https://example.com/custom-poster-2.png",
+      36: "https://example.com/custom-poster-2.png",
+      37: "https://example.com/custom-poster-2.png",
+      38: "https://example.com/custom-poster-2.png",
+      39: "https://example.com/custom-poster-2.png",
+      40: "https://example.com/custom-poster-2.png",
+      41: "https://example.com/custom-poster-2.png",
+      42: "https://example.com/custom-poster-2.png",
+      43: "https://example.com/custom-poster-2.png",
+      44: "https://example.com/custom-poster-2.png",
+      45: "https://example.com/custom-poster-2.png",
+      46: "https://example.com/custom-poster-2.png",
+      47: "https://example.com/custom-poster-2.png",
+      48: "https://example.com/custom-poster-2.png",
+      49: "https://example.com/custom-poster-2.png",
+      50: "https://example.com/custom-poster-2.png",
+      51: "https://example.com/custom-poster-2.png",
+      52: "https://example.com/custom-poster-2.png",
+      53: "https://example.com/custom-poster-2.png",
+      54: "https://example.com/custom-poster-2.png",
+      55: "https://example.com/custom-poster-2.png",
+      56: "https://example.com/custom-poster-2.png",
+      57: "https://example.com/custom-poster-2.png",
+      58: "https://example.com/custom-poster-2.png",
+      59: "https://example.com/custom-poster-2.png",
+      60: "https://example.com/custom-poster-2.png",
+      61: "https://example.com/custom-poster-2.png",
+      62: "https://example.com/custom-poster-2.png",
+      63: "https://example.com/custom-poster-2.png",
+      64: "https://example.com/custom-poster-2.png",
+      65: "https://example.com/custom-poster-2.png",
+      66: "https://example.com/custom-poster-2.png",
+      67: "https://example.com/custom-poster-2.png",
+      68: "https://example.com/custom-poster-2.png",
+      69: "https://example.com/custom-poster-2.png",
+      70: "https://example.com/custom-poster-2.png",
+      71: "https://example.com/custom-poster-2.png",
+      72: "https://example.com/custom-poster-2.png",
+      73: "https://example.com/custom-poster-2.png",
+      74: "https://example.com/custom-poster-2.png",
+      75: "https://example.com/custom-poster-2.png",
+      76: "https://example.com/custom-poster-2.png",
+      77: "https://example.com/custom-poster-2.png",
+      78: "https://example.com/custom-poster-2.png",
+      79: "https://example.com/custom-poster-2.png",
+      80: "https://example.com/custom-poster-2.png",
+      81: "https://example.com/custom-poster-2.png",
+      82: "https://example.com/custom-poster-2.png",
+      83: "https://example.com/custom-poster-2.png",
+      84: "https://example.com/custom-poster-2.png",
+      85: "https://example.com/custom-poster-2.png",
+      86: "https://example.com/custom-poster-2.png",
+      87: "https://example.com/custom-poster-2.png",
+      88: "https://example.com/custom-poster-2.png",
+      89: "https://example.com/custom-poster-2.png",
+      90: "https://example.com/custom-poster-2.png",
+      91: "https://example.com/custom-poster-2.png",
+      92: "https://example.com/custom-poster-2.png",
+      93: "https://example.com/custom-poster-2.png",
+      94: "https://example.com/custom-poster-2.png",
+      95: "https://example.com/custom-poster-2.png",
+      96: "https://example.com/custom-poster-2.png",
+      97: "https://example.com/custom-poster-2.png",
+      98: "https://example.com/custom-poster-2.png",
+      99: "https://example.com/custom-poster-2.png",
+      100: "https://example.com/custom-poster-2.png",
+      101: "https://example.com/custom-poster-2.png",
+      102: "https://example.com/custom-poster-2.png",
+      103: "https://example.com/custom-poster-2.png",
+      104: "https://example.com/custom-poster-2.png",
+      105: "https://example.com/custom-poster-2.png",
+      106: "https://example.com/custom-poster-2.png",
+      107: "https://example.com/custom-poster-2.png",
+      108: "https://example.com/custom-poster-2.png",
+      109: "https://example.com/custom-poster-2.png",
+      110: "https://example.com/custom-poster-2.png",
+      111: "https://example.com/custom-poster-2.png",
+      112: "https://example.com/custom-poster-2.png",
+      113: "https://example.com/custom-poster-2.png",
+      114: "https://example.com/custom-poster-2.png",
+      115: "https://example.com/custom-poster-2.png",
+      116: "https://example.com/custom-poster-2.png",
+      117: "https://example.com/custom-poster-2.png",
+      118: "https://example.com/custom-poster-2.png",
+      119: "https://example.com/custom-poster-2.png",
+      120: "https://example.com/custom-poster-2.png",
+      121: "https://example.com/custom-poster-2.png",
+      122: "https://example.com/custom-poster-2.png",
+      123: "https://example.com/custom-poster-2.png",
+      124: "https://example.com/custom-poster-2.png",
+      125: "https://example.com/custom-poster-2.png",
+      126: "https://example.com/custom-poster-2.png",
+      127: "https://example.com/custom-poster-2.png",
+      128: "https://example.com/custom-poster-2.png",
+      129: "https://example.com/custom-poster-2.png",
+      130: "https://example.com/custom-poster-2.png",
+      131: "https://example.com/custom-poster-2.png",
+      132: "https://example.com/custom-poster-2.png",
+      133: "https://example.com/custom-poster-2.png",
+      134: "https://example.com/custom-poster-2.png",
+      135: "https://example.com/custom-poster-2.png",
+      136: "https://example.com/custom-poster-2.png",
+      137: "https://example.com/custom-poster-2.png",
+      138: "https://example.com/custom-poster-2.png",
+      139: "https://example.com/custom-poster-2.png",
+      140: "https://example.com/custom-poster-2.png",
+      141: "https://example.com/custom-poster-2.png",
+      142: "https://example.com/custom-poster-2.png",
+      143: "https://example.com/custom-poster-2.png",
+      144: "https://example.com/custom-poster-2.png",
+      145: "https://example.com/custom-poster-2.png",
+      146: "https://example.com/custom-poster-2.png",
+      147: "https://example.com/custom-poster-2.png",
+      148: "https://example.com/custom-poster-2.png",
+      149: "https://example.com/custom-poster-2.png",
+      150: "https://example.com/custom-poster-2.png",
+      151: "https://example.com/custom-poster-2.png",
+      152: "https://example.com/custom-poster-2.png",
+      153: "https://example.com/custom-poster-2.png",
+      154: "https://example.com/custom-poster-2.png",
+      155: "https://example.com/custom-poster-2.png",
+      156: "https://example.com/custom-poster-2.png",
+      157: "https://example.com/custom-poster-2.png",
+      158: "https://example.com/custom-poster-2.png",
+      159: "https://example.com/custom-poster-2.png",
+      160: "https://example.com/custom-poster-2.png",
+      161: "https://example.com/custom-poster-2.png",
+      162: "https://example.com/custom-poster-2.png",
+      163: "https://example.com/custom-poster-2.png",
+      164: "https://example.com/custom-poster-2.png",
+      165: "https://example.com/custom-poster-2.png",
+      166: "https://example.com/custom-poster-2.png",
+      167: "https://example.com/custom-poster-2.png",
+      168: "https://example.com/custom-poster-2.png",
+      169: "https://example.com/custom-poster-2.png",
+      170: "https://example.com/custom-poster-2.png",
+      171: "https://example.com/custom-poster-2.png",
+      172: "https://example.com/custom-poster-2.png",
+      173: "https://example.com/custom-poster-2.png",
+      174: "https://example.com/custom-poster-2.png",
+      175: "https://example.com/custom-poster-2.png",
+      176: "https://example.com/custom-poster-2.png",
+      177: "https://example.com/custom-poster-2.png",
+      178: "https://example.com/custom-poster-2.png",
+      179: "https://example.com/custom-poster-2.png",
+      180: "https://example.com/custom-poster-2.png",
+      181: "https://example.com/custom-poster-2.png",
+      182: "https://example.com/custom-poster-2.png",
+      183: "https://example.com/custom-poster-2.png",
+      184: "https://example.com/custom-poster-2.png",
+      185: "https://example.com/custom-poster-2.png",
+      186: "https://example.com/custom-poster-2.png",
+      187: "https://example.com/custom-poster-2.png",
+      188: "https://example.com/custom-poster-2.png",
+      189: "https://example.com/custom-poster-2.png",
+      190: "https://example.com/custom-poster-2.png",
+      191: "https://example.com/custom-poster-2.png",
+      192: "https://example.com/custom-poster-2.png",
+      193: "https://example.com/custom-poster-2.png",
+      194: "https://example.com/custom-poster-2.png",
+      195: "https://example.com/custom-poster-2.png",
+      196: "https://example.com/custom-poster-2.png",
+      197: "https://example.com/custom-poster-2.png",
+      198: "https://example.com/custom-poster-2.png",
+      199: "https://example.com/custom-poster-2.png",
+      200: "https://example.com/custom-poster-2.png",
+    };
+
+    // =======================================================
+    // CUSTOM REDIRECT LINK OVERRIDES (1 to 200)
+    // Add or override specific redirect links here:
+    // =======================================================
+    const CUSTOM_REDIRECT_URLS = {
+      1: "https://example.com/video/1",
+      // 2: "https://example.com/custom-link-2",
+    };
+
+    let allVideos = [];
+    let filteredVideos = [];
+    let loadedCount = 0;
+    let currentSearch = "";
+    let currentSort = "num-asc";
+
+    const BASE_TOPICS = [
+      "Minecraft Survival Island Gameplay", "Overwatch Best Play of the Game Clips", "GTA V Insane Stunts & Fails", 
+      "Pokemon GO Dragonite Catch Live", "Clash Royale Legendary Chest Opening", "iPhone Unboxing First Impressions",
+      "Budget Gaming PC Build Guide", "Graphics Card Benchmark Test Review", "Top Billboard Hit Pop Songs Chart",
+      "Acoustic Guitar Cover Session", "Dream House Tour Vlog", "100 Layers Challenge",
+      "Water Bottle Flip Trickshots", "Try Not To Laugh Challenge", "NBA Championship Highlights",
+      "CS:GO 1v5 Clutch Moments", "FNAF Secret Ending Full Walkthrough", "Neon Hair Color Dye Surprise",
+      "Hydraulic Press vs Real Diamond", "DIY Fluffy Slime Tutorial", "Dabbing in Public for 24 Hours",
+      "Rubik's Cube Speedrun World Record", "Ultimate Room Setup Tour", "Automatic Redstone Door Tutorial",
+      "Battlefield Epic Multiplayer Moments", "10 Unknown Video Game Secrets", "Trampoline Park Hide and Seek",
+      "Everyday Natural Makeup Routine", "Tesla Ludicrous Mode Reactions", "Oculus Rift VR Funny Reactions",
+      "Movie Trailer Easter Eggs Breakdown", "5-Minute Easy Life Hacks", "Agario High Score World Record",
+      "Slither.io Giant Snake Gameplay", "Undertale True Pacifist Ending", "Rocket League Aerial Goals Montage",
+      "Destiny Raid World First Completion", "Fallout Secret Power Armor Guide", "Dark Souls No Hit Boss Battle",
+      "League of Legends Pentakill Montage", "HTC Vive Virtual Reality Horror", "Custom Mechanical Keyboard ASMR",
+      "Drone Scenic Cinematic 4K Footage", "Vlogging Camera Equipment Setup", "ASMR Whispering and Tapping",
+      "FIFA Ultimate Team Pack Opening", "NBA 2K Park Gameplay Highlights", "Forza Supercar Drift Battle",
+      "Sims Modern Mansion Speed Build", "Roller Coaster Point of View HD", "Stardew Valley Ideal Farm Layout",
+      "Roblox Natural Disaster Survival", "Hello Neighbor Basement Secret", "Cuphead Boss Battle No Damage",
+      "Dead by Daylight Killer Gameplay", "Gang Beasts Funny Multiplayer", "Subnautica Deep Sea Encounters",
+      "No Man's Sky Planet Exploration", "Factorio Mega Base Full Tour", "Rust Explosive Base Raid",
+      "ARK T-Rex Taming Guide", "7 Days to Die Horde Night Survival", "PUBG Early Alpha Winner Winner",
+      "WoW Artifact Weapons Guide", "Final Fantasy Raid Boss Fight", "Old School Runescape Fire Cape Guide",
+      "Dragon Ball Super Episode Review", "One Punch Man Best Fight Scenes", "My Hero Academia Epic Moments",
+      "Naruto Final Battle Animation", "K-Pop Top Dance Practice Video", "EDM Music Festival Live Stage",
+      "Acoustic Studio Live Performance", "Retro Arcade Championship", "Science Liquid Nitrogen Freeze Test"
+    ];
+
+    const UNIQUE_CREATORS = [
+      "PewDiePie", "Markiplier", "Jacksepticeye", "DanTDM", "CaptainSparklez", "NigaHiga", "Smosh",
+      "VSauce", "MKBHD", "LinusTechTips", "UnboxTherapy", "StampyLongHead", "PopularMMOs", "SSundee",
+      "Syndicate", "KSI", "W2S", "Miniminter", "Vikkstar123", "TBJZL", "Behzinga", "Zerkaa", "VanossGaming",
+      "H2ODelirious", "Daithi De Nogla", "IAmWildcat", "Terroriser", "BasicallyIDoWrk", "Lachlan", "Muselk",
+      "LazarBeam", "Ali-A", "TypicalGamer", "PrestonPlayz", "UnspeakableGaming", "Squeezie", "ElRubiusOMG",
+      "Vegetta777", "Willyrex", "AuronPlay", "Grefg", "Fernanfloo", "HolaSoyGerman", "Yuya", "LuisitoComunica",
+      "Inoxtag", "Joueur Du Grenier", "Gronkh", "JulienBam", "BibisBeautyPalace", "LaserLuca", "Paluten",
+      "A4 Channel", "Marmok", "GetampedTV", "DudePerfect", "FuriousPete", "MattStonie", "LAHWF", "VitalyzdTv",
+      "RomanAtwood", "BFvsGF", "FazeRug", "FazeApex", "FazeRain", "FazeBanks", "FazeAdapt", "FazeBlaziken",
+      "FazeCensor", "FazeJev", "CinemaSins", "ScreenRant", "DeadMeat", "GameTheory", "FilmTheory", "ProJared",
+      "PBG", "JonTron", "AVGN", "AlphaOmegaSin", "Boogie2988", "AngryJoeShow", "SuperBunnyhop", "ACG",
+      "Gameranx", "WhatCultureGaming", "Outsidexbox", "IGN", "Gamespot", "KotakuTV", "Eurogamer", "WatchMojo",
+      "ThreadBanger", "RosannaPansino", "HowToBasic", "GoodMythicalMorning", "RhettAndLink", "SmoshGames",
+      "Node", "CorridorDigital", "RocketJump", "Freddiew", "Devinsupertramp", "ActionMovieDad", "DavidDobrik",
+      "LizaKoshy", "CaseyNeistat", "Superwoman", "ZoeSugg", "AlfieDeyes", "MarcusButler", "PointlessBlog",
+      "TatcherZ", "JoeSugg", "CasparLee", "OliWhite", "JackSucksAtLife", "WillNE", "MemeMousa", "Pyrocynical",
+      "NerdCity", "IubTV", "GradeAUnderA", "LeafyIsHere", "Keemstar", "DramaAlert", "Scarce", "IDubbbz",
+      "FilthyFrank", "Maxmoefoe", "Anything4Views", "HowToBasicVlog", "SuperHeroKids", "GuavaJuice", "BraveWilderness",
+      "CoyotePeterson", "Veritasium", "SmarterEveryDay", "Numberphile", "MinutePhysics", "Kurzgesagt", "CGPGrey",
+      "TechLead", "AustinEvans", "JonathanMorrison", "UrAvgConsumer", "Dave2D", "MarquesBrownlee", "Pocketnow",
+      "TechnoBuffalo", "iJustine", "T3hb3stTech", "JerryRigEverything", "FlossyCarter", "DetroitBORG", "GeekyRanx",
+      "Nerd3", "ManyATrueNerd", "Northernlion", "MathasGames", "Baertaffy", "DanGheesling", "Sips", "YogscastLewis",
+      "YogscastSimon", "HatFilmz", "GameGrumps", "Egoraptor", "NinjaSexParty", "SuperMega", "OneyPlays", "SrPelo",
+      "TerminalMontage", "JaidenAnimations", "TheOdd1sOut", "Domics", "SomethingElseYT", "LetMeExplainStudios",
+      "Chills", "NukeTop5", "Top5s", "BeAmazed", "BrightSide", "5MinuteCrafts", "TroomTroom", "LifeHacker360",
+      "CrazyRussianHacker", "GrantThompson", "KingOfRandom", "TKOR", "NileRed", "Styropyro", "Hacksmith",
+      "WilliamOsman", "MichaelStevens", "JakePaul", "LoganPaul", "TannerFox", "JakeRoper", "DerekMuller"
+    ];
+
+    function generateVideos() {
+      allVideos = [];
+      for (let i = 0; i < TOTAL_VIDEOS; i++) {
+        const indexNumber = i + 1;
+        const topic = BASE_TOPICS[i % BASE_TOPICS.length];
+        const channel = UNIQUE_CREATORS[i];
+
+        const seed = ((indexNumber * 9301 + 49297) % 233280);
+        const seed2 = ((indexNumber * 49297 + 9301) % 233280);
+
+        const rawViews = Math.floor((seed / 233280) * 9800000) + 1500;
+        let viewsFormatted = rawViews >= 1000000 
+          ? (rawViews / 1000000).toFixed(1) + "M views" 
+          : Math.floor(rawViews / 1000) + "K views";
+
+        const monthsAgo = Math.floor((seed2 / 233280) * 11) + 1;
+        const timeAgo = monthsAgo === 1 ? "1 month ago" : `${monthsAgo} months ago`;
+
+        // Generate unique redirect link for each video (1 to 200)
+        const redirectUrl = CUSTOM_REDIRECT_URLS[indexNumber] || `https://example.com/video/${indexNumber}`;
+
+        // Generate unique thumbnail URL for each video (1 to 200)
+        const thumbnailSrc = CUSTOM_THUMBNAILS[indexNumber] || `https://example.com/thumbnails/thumb-${indexNumber}.png`;
+
+        allVideos.push({
+          id: indexNumber,
+          title: topic,
+          channel: channel,
+          rawViews: rawViews,
+          views: viewsFormatted,
+          timeAgo: timeAgo,
+          redirectUrl: redirectUrl,
+          thumbnail: thumbnailSrc
+        });
+      }
+      applyFiltersAndSort();
+    }
+
+    function createCardHTML(video) {
+      return `
+        <a href="${video.redirectUrl}" class="yt-card rounded-sm overflow-hidden cursor-pointer flex flex-col group block active:bg-gray-50">
+          <div class="relative aspect-video bg-gray-200 overflow-hidden flex-shrink-0">
+            <img 
+              src="${video.thumbnail}" 
+              class="w-full h-full object-cover group-hover:opacity-95 transition duration-150" 
+              alt="${video.title}"
+              loading="lazy"
+              onerror="this.src='data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22320%22%20height%3D%22180%22%3E%3Crect%20width%3D%22320%22%20height%3D%22180%22%20fill%3D%22%23e5e5e5%22%2F%3E%3Crect%20x%3D%226%22%20y%3D%226%22%20width%3D%2242%22%20height%3D%2220%22%20rx%3D%222%22%20fill%3D%22%23000000%22%20opacity%3D%220.82%22%2F%3E%3Ctext%20x%3D%2227%22%20y%3D%2220%22%20font-family%3D%22Roboto%2C%20sans-serif%22%20font-size%3D%2211%22%20font-weight%3D%22700%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E${video.id}%3C%2Ftext%3E%3C%2Fsvg%3E'"
+            >
+          </div>
+          <div class="p-2.5 sm:p-3 flex flex-col flex-1 justify-between bg-white">
+            <div>
+              <h3 class="yt-title text-xs sm:text-sm font-bold text-gray-900 line-clamp-2 leading-tight transition">
+                ${video.title}
+              </h3>
+              <p class="text-[11px] sm:text-xs text-gray-600 mt-1 flex items-center gap-1 font-medium truncate">
+                ${video.channel}
+                <i class="fa-solid fa-circle-check text-[9px] text-gray-400 flex-shrink-0"></i>
+              </p>
+            </div>
+            <div class="mt-2 text-[10px] sm:text-[11px] text-gray-500 flex items-center gap-1.5 border-t border-gray-100 pt-1.5">
+              <span>${video.views}</span>
+              <span>•</span>
+              <span>${video.timeAgo}</span>
+            </div>
+          </div>
+        </a>
+      `;
+    }
+
+    function renderBatch() {
+      const grid = document.getElementById('videoGrid');
+      const loader = document.getElementById('feedLoader');
+      const noResults = document.getElementById('noResultsState');
+
+      if (loadedCount === 0) grid.innerHTML = '';
+
+      if (filteredVideos.length === 0) {
+        noResults.classList.remove('hidden');
+        loader.classList.add('hidden');
+        return;
+      } else {
+        noResults.classList.add('hidden');
+      }
+
+      const nextItems = filteredVideos.slice(loadedCount, loadedCount + BATCH_SIZE);
+      nextItems.forEach(video => grid.insertAdjacentHTML('beforeend', createCardHTML(video)));
+      loadedCount += nextItems.length;
+
+      if (loadedCount >= filteredVideos.length) {
+        loader.classList.add('hidden');
+      } else {
+        loader.classList.remove('hidden');
+      }
+    }
+
+    function applyFiltersAndSort() {
+      loadedCount = 0;
+      const searchStatus = document.getElementById('searchStatus');
+      const searchQueryText = document.getElementById('searchQueryText');
+      const resultCount = document.getElementById('resultCount');
+      const visibleCount = document.getElementById('visibleCount');
+
+      filteredVideos = allVideos.filter(video => {
+        if (!currentSearch) return true;
+        const q = currentSearch.toLowerCase();
+        return video.title.toLowerCase().includes(q) || video.channel.toLowerCase().includes(q);
+      });
+
+      filteredVideos.sort((a, b) => {
+        return currentSort === 'num-asc' ? a.id - b.id : b.id - a.id;
+      });
+
+      visibleCount.innerText = filteredVideos.length;
+
+      if (currentSearch) {
+        searchStatus.classList.remove('hidden');
+        searchQueryText.innerText = currentSearch;
+        resultCount.innerText = filteredVideos.length;
+      } else {
+        searchStatus.classList.add('hidden');
+      }
+
+      renderBatch();
+    }
+
+    function setupEvents() {
+      const searchInput = document.getElementById('searchInput');
+      const clearSearchBtn = document.getElementById('clearSearchBtn');
+      const searchSubmitBtn = document.getElementById('searchSubmitBtn');
+      const sortSelect = document.getElementById('sortSelect');
+      const mobileSearchToggleBtn = document.getElementById('mobileSearchToggleBtn');
+      const mobileSearchBackBtn = document.getElementById('mobileSearchBackBtn');
+      const searchBarContainer = document.getElementById('searchBarContainer');
+      const headerLogoContainer = document.getElementById('headerLogoContainer');
+      const mobileSearchTriggerContainer = document.getElementById('mobileSearchTriggerContainer');
+
+      searchInput.addEventListener('input', (e) => {
+        currentSearch = e.target.value.trim();
+        clearSearchBtn.classList.toggle('hidden', !currentSearch);
+        applyFiltersAndSort();
+      });
+
+      clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        currentSearch = '';
+        clearSearchBtn.classList.add('hidden');
+        applyFiltersAndSort();
+        searchInput.focus();
+      });
+
+      searchSubmitBtn.addEventListener('click', () => {
+        currentSearch = searchInput.value.trim();
+        applyFiltersAndSort();
+      });
+
+      sortSelect.addEventListener('change', (e) => {
+        currentSort = e.target.value;
+        applyFiltersAndSort();
+      });
+
+      mobileSearchToggleBtn.addEventListener('click', () => {
+        headerLogoContainer.classList.add('hidden');
+        mobileSearchTriggerContainer.classList.add('hidden');
+        searchBarContainer.classList.remove('hidden');
+        searchBarContainer.classList.add('flex');
+        searchInput.focus();
+      });
+
+      mobileSearchBackBtn.addEventListener('click', () => {
+        searchBarContainer.classList.add('hidden');
+        searchBarContainer.classList.remove('flex');
+        headerLogoContainer.classList.remove('hidden');
+        mobileSearchTriggerContainer.classList.remove('hidden');
+      });
+
+      document.getElementById('resetSearchBtn').addEventListener('click', () => {
+        searchInput.value = '';
+        currentSearch = '';
+        clearSearchBtn.classList.add('hidden');
+        applyFiltersAndSort();
+      });
+
+      window.addEventListener('scroll', () => {
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+          if (loadedCount < filteredVideos.length) {
+            renderBatch();
+          }
+        }
+      });
+    }
+
+    window.onload = function() {
+      generateVideos();
+      setupEvents();
+    };
+  </script>
+</body>
+</html>
